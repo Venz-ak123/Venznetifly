@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uploader Netlify</title>
+    <title>Venz</title>
     <style>
         body {
             font-family: sans-serif;
@@ -15,6 +15,7 @@
             margin: 0;
             flex-direction: column;
         }
+
         .container {
             background-color: #ffffff;
             padding: 30px;
@@ -24,10 +25,12 @@
             max-width: 400px;
             text-align: center;
         }
+
         h1 {
             color: #333;
             margin-bottom: 20px;
         }
+
         input[type="file"], button {
             margin: 10px 0;
             padding: 10px;
@@ -35,6 +38,7 @@
             width: 100%;
             box-sizing: border-box;
         }
+
         button {
             background-color: #20b2aa; /* Light Sea Green */
             color: white;
@@ -43,42 +47,38 @@
             font-size: 16px;
             transition: background-color 0.3s;
         }
+
         button:hover:not(:disabled) {
             background-color: #1a938c;
         }
-        /* --- Animasi Loading --- */
+
+        /* --- Animasi Loading (Preloader) --- */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none;
+            background-color: rgba(255, 255, 255, 0.9); /* Latar putih transparan */
+            display: none; /* Disembunyikan secara default */
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
+
         .spinner {
             border: 6px solid #f3f3f3;
-            border-top: 6px solid #20b2aa;
+            border-top: 6px solid #20b2aa; /* Warna spinner */
             border-radius: 50%;
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .message {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
-            display: none;
-        }
-        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 </head>
 <body>
@@ -88,68 +88,40 @@
     </div>
 
     <div class="container">
-        <h1>Netlify Uploader</h1>
+        <h1>Upload File Netlify</h1>
         
-        <form id="uploadForm">
-            <label for="file-input">Pilih File:</label>
-            <input type="file" id="file-input" name="file" required>
-            <button type="submit" id="submit-button">Upload File</button>
-        </form>
+        <form name="file_upload_form" 
+              method="POST" 
+              data-netlify="true" 
+              enctype="multipart/form-data" 
+              netlify-honeypot="bot-field" 
+              onsubmit="showLoadingAndRedirect()">
 
-        <div id="message" class="message"></div>
+            <input type="hidden" name="form-name" value="file_upload_form" />
+            <p style="display: none;">
+                <label>Jangan isi ini: <input name="bot-field" /></label>
+            </p>
+            
+            <label for="file-input">Pilih File:</label>
+            <input type="file" id="file-input" name="uploaded_file" required> 
+            
+            <button type="submit" id="submit-button">Upload & Proses</button>
+        </form>
     </div>
 
     <script>
-        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const loadingOverlay = document.getElementById('loading');
-            const submitButton = document.getElementById('submit-button');
-            const messageDiv = document.getElementById('message');
+        function showLoadingAndRedirect() {
+            // 1. Tampilkan animasi loading
+            document.getElementById('loading').style.display = 'flex';
+            
+            // 2. Nonaktifkan tombol untuk mencegah klik ganda
+            document.getElementById('submit-button').disabled = true;
+            document.getElementById('submit-button').innerText = 'Mengunggah...';
 
-            // 1. Tampilkan Loading
-            loadingOverlay.style.display = 'flex';
-            submitButton.disabled = true;
-            messageDiv.style.display = 'none';
-
-            try {
-                const fileInput = document.getElementById('file-input');
-                const file = fileInput.files[0];
-
-                if (!file) {
-                    throw new Error("Pilih file terlebih dahulu.");
-                }
-
-                // Kita mengirim file ke Netlify Function di path /.netlify/functions/upload
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const response = await fetch('/.netlify/functions/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'Gagal mengupload file.');
-                }
-                
-                // 3. Tampilkan Pesan Sukses
-                messageDiv.className = 'message success';
-                messageDiv.innerHTML = `✅ **Upload Berhasil!** File **${result.filename}** telah diunggah.`;
-
-            } catch (error) {
-                // 3. Tampilkan Pesan Error
-                messageDiv.className = 'message error';
-                messageDiv.innerHTML = `❌ **Upload Gagal!** ${error.message}`;
-            } finally {
-                // 4. Sembunyikan Loading
-                loadingOverlay.style.display = 'none';
-                submitButton.disabled = false;
-                messageDiv.style.display = 'block';
-                document.getElementById('uploadForm').reset(); // Bersihkan form
-            }
-        });
+            // CATATAN: Karena ini menggunakan fitur Netlify Forms, 
+            // setelah upload berhasil, Netlify akan secara otomatis mengarahkan
+            // ke halaman sukses standar (atau Anda bisa membuat halaman sukses kustom).
+        }
     </script>
 </body>
 </html>
