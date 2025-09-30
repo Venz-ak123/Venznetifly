@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venz</title>
+    <title>Upload File & Domain</title>
     <style>
         body {
             font-family: sans-serif;
@@ -31,16 +31,17 @@
             margin-bottom: 20px;
         }
 
-        input[type="file"], button {
+        input:not([type="hidden"]), button {
             margin: 10px 0;
             padding: 10px;
             border-radius: 4px;
             width: 100%;
             box-sizing: border-box;
+            border: 1px solid #ccc;
         }
 
         button {
-            background-color: #20b2aa; /* Light Sea Green */
+            background-color: #20b2aa; 
             color: white;
             border: none;
             cursor: pointer;
@@ -52,23 +53,22 @@
             background-color: #1a938c;
         }
 
-        /* --- Animasi Loading (Preloader) --- */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.9); /* Latar putih transparan */
-            display: none; /* Disembunyikan secara default */
+            background-color: rgba(255, 255, 255, 0.9);
+            display: none; 
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 9999;
         }
 
         .spinner {
             border: 6px solid #f3f3f3;
-            border-top: 6px solid #20b2aa; /* Warna spinner */
+            border-top: 6px solid #20b2aa;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -88,39 +88,58 @@
     </div>
 
     <div class="container">
-        <h1>Upload File Netlify</h1>
+        <h1>Upload File & Domain Anda</h1>
         
+        <!-- Formulir ini akan dikirim ke Netlify Forms dan kemudian dialihkan (redirect) ke success.html -->
         <form name="file_upload_form" 
               method="POST" 
               data-netlify="true" 
               enctype="multipart/form-data" 
-              netlify-honeypot="bot-field" 
-              onsubmit="showLoadingAndRedirect()">
+              action="/success.html"
+              id="uploadForm"
+              onsubmit="showLoadingAndDisable()">
 
+            <!-- Input tersembunyi wajib agar Netlify tahu nama form-nya -->
             <input type="hidden" name="form-name" value="file_upload_form" />
-            <p style="display: none;">
-                <label>Jangan isi ini: <input name="bot-field" /></label>
-            </p>
-            
-            <label for="file-input">Pilih File:</label>
+
+            <label for="domain-input" style="display: block; text-align: left; margin-top: 15px;">Nama Domain (contoh: venz.netlify.app):</label>
+            <input type="text" id="domain-input" name="user_domain" placeholder="Masukkan domain Anda..." required>
+
+            <label for="file-input" style="display: block; text-align: left;">Pilih File:</label>
             <input type="file" id="file-input" name="uploaded_file" required> 
             
-            <button type="submit" id="submit-button">Upload & Proses</button>
+            <button type="submit" id="submit-button">Upload & Lanjut</button>
         </form>
     </div>
 
     <script>
-        function showLoadingAndRedirect() {
-            // 1. Tampilkan animasi loading
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            
+            const domainInput = document.getElementById('domain-input');
+            let domain = domainInput.value.trim();
+
+            if (!domain) return;
+            
+            // 1. Tambahkan "http://" jika domain tidak memiliki protokol
+            if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
+                domain = 'http://' + domain;
+            }
+
+            // 2. Arahkan formulir ke halaman sukses, sambil membawa domain sebagai parameter URL
+            // Netlify akan memproses form dulu, baru melakukan redirect ke action="/success.html?domain=..."
+            this.action = `/success.html?domain=${encodeURIComponent(domain)}`;
+            
+            // Lanjutkan proses submit (yang akan memanggil showLoadingAndDisable)
+        });
+
+
+        function showLoadingAndDisable() {
+            // Tampilkan animasi loading
             document.getElementById('loading').style.display = 'flex';
             
-            // 2. Nonaktifkan tombol untuk mencegah klik ganda
+            // Nonaktifkan tombol untuk mencegah klik ganda
             document.getElementById('submit-button').disabled = true;
             document.getElementById('submit-button').innerText = 'Mengunggah...';
-
-            // CATATAN: Karena ini menggunakan fitur Netlify Forms, 
-            // setelah upload berhasil, Netlify akan secara otomatis mengarahkan
-            // ke halaman sukses standar (atau Anda bisa membuat halaman sukses kustom).
         }
     </script>
 </body>
