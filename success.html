@@ -8,7 +8,7 @@
             text-align: center;
             padding: 50px 20px;
             min-height: 100vh;
-            background-color: #e6f7f6; /* Latar belakang cerah */
+            background-color: #e6f7f6;
         }
         .success-box {
             background-color: #ffffff;
@@ -62,11 +62,11 @@
             let userDomain = urlParams.get('domain');
 
             if (userDomain) {
-                // Pastikan format URL sudah benar untuk link
-                let displayDomain = userDomain;
+                // Netlify mungkin mengirimkan URL yang sudah di-encode
+                userDomain = decodeURIComponent(userDomain);
 
                 // Hapus protokol (http/https) untuk tampilan yang lebih rapi
-                displayDomain = displayDomain.replace(/(^\w+:|^)\/\//, '');
+                let displayDomain = userDomain.replace(/(^\w+:|^)\/\//, '');
 
                 // Tampilkan link
                 domainLink.href = userDomain;
@@ -74,6 +74,7 @@
             } else {
                 // Jika tidak ada parameter domain, beri pesan default
                 domainLink.textContent = 'Domain tidak ditemukan di URL.';
+                domainLink.href = '#';
                 domainLink.style.backgroundColor = '#ccc';
             }
         });
