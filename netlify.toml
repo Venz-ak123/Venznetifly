@@ -1,7 +1,0 @@
-[build]
-# Direktori tempat Netlify mencari file statis Anda
-publish = "." 
-
-[functions]
-# Sangat penting: Memberi tahu Netlify untuk mencari file fungsi di folder root.
-directory = "."
